@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>broadcast chan Back,Transfer,Deposit,Query,ChangePin,Withdraw,Return_Card,Create_Card,Close_Account,Insert_Card;
+
+
+clock gclk;</declaration>
+	<template>
+		<name>Processor</name>
+		<declaration>clock t;
+void update(){}</declaration>
+		<location id="id0" x="-730" y="-238">
+			<name x="-740" y="-272">idle</name>
+		</location>
+		<location id="id1" x="-518" y="-246">
+			<name x="-577" y="-289">Wainting_Request</name>
+		</location>
+		<location id="id2" x="-314" y="-238">
+			<name x="-324" y="-272">Processing</name>
+			<committed/>
+		</location>
+		<location id="id3" x="-161" y="-238">
+			<name x="-171" y="-272">Updating</name>
+			<committed/>
+		</location>
+		<init ref="id0"/>
+		<transition id="id4">
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-365" y="-120">Back!</label>
+			<nail x="-178" y="-94"/>
+			<nail x="-467" y="-103"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id2"/>
+			<target ref="id3"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-459" y="-408">Transfer?</label>
+			<nail x="-467" y="-391"/>
+			<nail x="-382" y="-391"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-458" y="-323">Deposit?</label>
+			<nail x="-476" y="-306"/>
+			<nail x="-382" y="-306"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-450" y="-179">Query?</label>
+			<nail x="-476" y="-153"/>
+			<nail x="-365" y="-145"/>
+		</transition>
+		<transition id="id9">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-466" y="-216">ChangePin?</label>
+			<nail x="-476" y="-195"/>
+			<nail x="-365" y="-195"/>
+		</transition>
+		<transition id="id10">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-459" y="-263">Withdraw?</label>
+		</transition>
+		<transition id="id11">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-678" y="-145">Return_Card?</label>
+			<nail x="-552" y="-128"/>
+			<nail x="-696" y="-128"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-663" y="-391">Create_Card?</label>
+			<nail x="-679" y="-374"/>
+			<nail x="-577" y="-374"/>
+		</transition>
+		<transition id="id13">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-653" y="-196">Close_Account?</label>
+			<nail x="-560" y="-179"/>
+			<nail x="-671" y="-179"/>
+		</transition>
+		<transition id="id14">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-653" y="-314">Insert_Card?</label>
+			<nail x="-671" y="-297"/>
+			<nail x="-577" y="-297"/>
+		</transition>
+	</template>
+	<template>
+		<name>ATM</name>
+		<declaration>clock t;
+int cash = 8000;
+void update(){}</declaration>
+		<location id="id15" x="110" y="170">
+			<name x="76" y="128">EntryPage</name>
+		</location>
+		<location id="id16" x="425" y="181">
+			<name x="425" y="161">SelectPage</name>
+		</location>
+		<location id="id17" x="434" y="-77">
+			<name x="434" y="-97">TransferPage</name>
+		</location>
+		<location id="id18" x="612" y="-54">
+			<name x="612" y="-74">DepositCashPage</name>
+		</location>
+		<location id="id19" x="536" y="357">
+			<name x="536" y="337">WithdrawCashPage</name>
+		</location>
+		<location id="id20" x="714" y="178">
+			<name x="714" y="167">ChangePinPage</name>
+		</location>
+		<location id="id21" x="706" y="56">
+			<name x="714" y="22">QueryPage</name>
+		</location>
+		<init ref="id15"/>
+		<transition id="id22">
+			<source ref="id21"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="588" y="60">Back?</label>
+			<nail x="570" y="99"/>
+		</transition>
+		<transition id="id23">
+			<source ref="id16"/>
+			<target ref="id21"/>
+			<label kind="synchronisation" x="595" y="119">Query?</label>
+			<nail x="629" y="133"/>
+		</transition>
+		<transition id="id24">
+			<source ref="id19"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="443" y="209">Back?</label>
+			<nail x="536" y="272"/>
+		</transition>
+		<transition id="id25">
+			<source ref="id16"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="442" y="280">Withdraw!</label>
+			<nail x="468" y="323"/>
+		</transition>
+		<transition id="id26">
+			<source ref="id20"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="561" y="201">Back?</label>
+			<nail x="586" y="229"/>
+		</transition>
+		<transition id="id27">
+			<source ref="id16"/>
+			<target ref="id20"/>
+			<label kind="synchronisation" x="569" y="153">ChangePin!</label>
+		</transition>
+		<transition id="id28">
+			<source ref="id18"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="528" y="39">Back?</label>
+			<nail x="570" y="56"/>
+		</transition>
+		<transition id="id29">
+			<source ref="id16"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="485" y="-37">Deposit!</label>
+			<nail x="502" y="14"/>
+		</transition>
+		<transition id="id30">
+			<source ref="id15"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="238" y="68">Insert_Card!</label>
+			<nail x="179" y="99"/>
+			<nail x="370" y="105"/>
+		</transition>
+		<transition id="id31">
+			<source ref="id16"/>
+			<target ref="id15"/>
+			<label kind="synchronisation" x="226" y="232">Close_Account!</label>
+			<nail x="387" y="266"/>
+			<nail x="166" y="257"/>
+		</transition>
+		<transition id="id32">
+			<source ref="id16"/>
+			<target ref="id15"/>
+			<label kind="synchronisation" x="226" y="283">Return_Card!</label>
+			<nail x="430" y="308"/>
+			<nail x="132" y="300"/>
+		</transition>
+		<transition id="id33">
+			<source ref="id15"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="247" y="153">Create_Card!</label>
+		</transition>
+		<transition id="id34">
+			<source ref="id16"/>
+			<target ref="id17"/>
+			<label kind="synchronisation" x="366" y="0">Transfer!</label>
+			<nail x="374" y="42"/>
+		</transition>
+		<transition id="id35">
+			<source ref="id17"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="416" y="59">Back?</label>
+			<nail x="476" y="42"/>
+		</transition>
+	</template>
+	<system>// Process
+
+ATM1 = ATM();
+
+system Processor, ATM1;
+    </system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-24 20:08:19 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>A[] ATM1.SelectPage imply Processor.Wainting_Request</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-24 20:08:21 +0800">
+			</result>
+		</query>
+	</queries>
+</nta>

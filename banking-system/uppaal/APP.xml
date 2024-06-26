@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>broadcast chan Back,Transfer,Query,ChangePin,LogIn,LogOut;
+
+clock gclk;</declaration>
+	<template>
+		<name>Processor</name>
+		<declaration>clock t;
+void update(){}</declaration>
+		<location id="id0" x="-730" y="-238">
+			<name x="-740" y="-272">idle</name>
+		</location>
+		<location id="id1" x="-518" y="-246">
+			<name x="-577" y="-289">Wainting_Request</name>
+		</location>
+		<location id="id2" x="-314" y="-238">
+			<name x="-324" y="-272">Processing</name>
+			<committed/>
+		</location>
+		<location id="id3" x="-161" y="-238">
+			<name x="-171" y="-272">Updating</name>
+			<committed/>
+		</location>
+		<init ref="id0"/>
+		<transition id="id4">
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-365" y="-120">Back!</label>
+			<nail x="-178" y="-94"/>
+			<nail x="-467" y="-103"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id2"/>
+			<target ref="id3"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-459" y="-408">Transfer?</label>
+			<nail x="-467" y="-391"/>
+			<nail x="-382" y="-391"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-450" y="-179">Query?</label>
+			<nail x="-476" y="-153"/>
+			<nail x="-365" y="-145"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-466" y="-216">ChangePin?</label>
+			<nail x="-476" y="-195"/>
+			<nail x="-365" y="-195"/>
+		</transition>
+		<transition id="id9">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-663" y="-391">LogIn?</label>
+			<nail x="-679" y="-374"/>
+			<nail x="-577" y="-374"/>
+		</transition>
+		<transition id="id10">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-653" y="-196">LogOut?</label>
+			<nail x="-560" y="-179"/>
+			<nail x="-671" y="-179"/>
+		</transition>
+	</template>
+	<template>
+		<name>APP</name>
+		<location id="id11" x="-153" y="85">
+			<name x="-187" y="43">EntryPage</name>
+		</location>
+		<location id="id12" x="162" y="96">
+			<name x="162" y="76">SelectPage</name>
+		</location>
+		<location id="id13" x="170" y="-153">
+			<name x="170" y="-173">TransferPage</name>
+		</location>
+		<location id="id14" x="221" y="255">
+			<name x="187" y="280">ChangePinPage</name>
+		</location>
+		<location id="id15" x="416" y="-25">
+			<name x="424" y="-59">QueryPage</name>
+		</location>
+		<init ref="id11"/>
+		<transition id="id16">
+			<source ref="id15"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="325" y="-25">Back?</label>
+			<nail x="280" y="-25"/>
+		</transition>
+		<transition id="id17">
+			<source ref="id12"/>
+			<target ref="id15"/>
+			<label kind="synchronisation" x="332" y="34">Query?</label>
+			<nail x="366" y="48"/>
+		</transition>
+		<transition id="id18">
+			<source ref="id14"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="298" y="116">Back?</label>
+			<nail x="323" y="161"/>
+		</transition>
+		<transition id="id19">
+			<source ref="id12"/>
+			<target ref="id14"/>
+			<label kind="synchronisation" x="306" y="68">ChangePin!</label>
+		</transition>
+		<transition id="id20">
+			<source ref="id12"/>
+			<target ref="id11"/>
+			<label kind="synchronisation" x="-37" y="147">LogOut!</label>
+			<nail x="124" y="181"/>
+			<nail x="-97" y="172"/>
+		</transition>
+		<transition id="id21">
+			<source ref="id11"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="-34" y="-8">LogIn!</label>
+			<nail x="-85" y="17"/>
+			<nail x="93" y="17"/>
+		</transition>
+		<transition id="id22">
+			<source ref="id12"/>
+			<target ref="id13"/>
+			<label kind="synchronisation" x="103" y="-85">Transfer!</label>
+			<nail x="111" y="-43"/>
+		</transition>
+		<transition id="id23">
+			<source ref="id13"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="153" y="-26">Back?</label>
+			<nail x="212" y="-34"/>
+		</transition>
+	</template>
+	<system>// Process
+
+APP1 = APP();
+
+system Processor, APP1;
+    </system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-24 20:10:49 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>A[] APP1.SelectPage imply Processor.Wainting_Request</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-24 20:10:51 +0800">
+			</result>
+		</query>
+	</queries>
+</nta>
