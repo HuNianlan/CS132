@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+const int N = 2;
+
+typedef int[0,N-1] ID;
+typedef int[0,3] FLOOR;
+typedef bool TARGETS[4];
+typedef int STATE;
+typedef int DIRECTION;
+
+STATE status[N] = {2, 2};
+DIRECTION direction[N] = {2, 2};
+FLOOR current_floor[N] = {1, 1};
+TARGETS target_floor[N] = {{false, false, false, false}, {false, false, false, false}};
+TARGETS target_up[N] = {{false, false, false, false}, {false, false, false, false}};
+TARGETS target_down[N] = {{false, false, false, false}, {false, false, false, false}};
+
+broadcast chan open_door[N], close_door[N];
+broadcast chan down[N], up[N];
+
+clock gclk;
+</declaration>
+	<template>
+		<name>User</name>
+		<parameter>const ID id</parameter>
+		<declaration>int i = 0;
+
+int compute_callup_time(ID id, FLOOR floor_) {
+    if (direction[id] == 2) {
+        return abs(current_floor[id] - floor_);
+    } else if (direction[id] == 1) {
+        FLOOR min_floor = current_floor[id];
+        for (i = 0; i &lt; current_floor[id]; i++) {
+            if (target_floor[id][i] or target_up[id][i] or target_down[id][i]) {
+                min_floor = i;
+                return abs(floor_ - min_floor) + (current_floor[id] - min_floor);
+            } 
+        }
+        return abs(floor_ - min_floor) + (current_floor[id] - min_floor);
+    } else if (direction[id] == 0) {
+        if (floor_ &gt;= current_floor[id]) {
+            return floor_ - current_floor[id];
+        } else {
+            FLOOR max_floor = current_floor[id];
+            for (i = current_floor[id]; i &lt; 4; i++) {
+                if (target_floor[id][i] or target_up[id][i] or target_down[id][i]) {
+                    max_floor = i;
+                }
+            }
+            return (max_floor - current_floor[id]) + (max_floor - floor_);
+        }
+    }
+    return 10;
+}
+
+int compute_calldown_time(ID id, FLOOR floor_) {
+    if (direction[id] == 2) {
+        return abs(current_floor[id] - floor_);
+    } else if (direction[id] == 1) {
+        if (floor_ &lt;= current_floor[id]) {
+            return current_floor[id] - floor_;
+        } else {
+            FLOOR min_floor = current_floor[id];
+            for (i = 0; i &lt; current_floor[id]; i++) {
+                if (target_floor[id][i] or target_up[id][i] or target_down[id][i]) {
+                    min_floor = i;
+                    return abs(floor_ - min_floor) + (current_floor[id] - min_floor);
+                } 
+            }
+            return abs(floor_ - min_floor) + (current_floor[id] - min_floor);
+        }
+    } else if (direction[id] == 0) {
+        FLOOR max_floor = current_floor[id];
+        for (i = current_floor[id]; i &lt; 4; i++) {
+            if (target_floor[id][i] or target_up[id][i] or target_down[id][i]) {
+                max_floor = i;
+            }
+        }
+        return (max_floor - current_floor[id]) + (max_floor - floor_);
+    }
+    return 10;
+}
+
+void press(ID id, FLOOR floor_) {
+    target_floor[id][floor_] = true;
+}
+
+int arrive_time1 = 0;
+int arrive_time2 = 0;
+ID ele_id = 0;
+
+void call_up(FLOOR floor_) {
+    if (target_up[0][floor_] or target_up[1][floor_]) {
+        return;
+    }
+    if (target_down[0][floor_]) {
+        target_up[1][floor_] = true;
+        return;
+    } else if (target_down[1][floor_]) {
+        target_up[0][floor_] = true;
+        return;
+    }
+    arrive_time1 = compute_callup_time(0, floor_);
+    arrive_time2 = compute_callup_time(1, floor_);
+    if (arrive_time1 &lt; arrive_time2) {
+        ele_id = 0;
+    } else {
+        ele_id = 1;
+    }
+    target_up[ele_id][floor_] = true;
+}
+
+void call_down(FLOOR floor_) {
+    if (target_down[0][floor_] or target_down[1][floor_]) {
+        return;
+    }
+    if (target_up[0][floor_]) {
+        target_down[1][floor_] = true;
+        return;
+    } else if (target_up[1][floor_]) {
+        target_down[0][floor_] = true;
+        return;
+    }
+    arrive_time1 = compute_calldown_time(0, floor_);
+    arrive_time2 = compute_calldown_time(1, floor_);
+    if (arrive_time1 &lt; arrive_time2) {
+        ele_id = 0;
+    } else {
+        ele_id = 1;
+    }
+    target_down[ele_id][floor_] = true;
+}</declaration>
+		<location id="id0" x="-170" y="-68">
+		</location>
+		<location id="id1" x="-340" y="-68">
+			<name x="-450" y="-76">Press_Open</name>
+			<committed/>
+		</location>
+		<location id="id2" x="0" y="-68">
+			<name x="17" y="-76">Press_Close</name>
+			<committed/>
+		</location>
+		<init ref="id0"/>
+		<transition id="id3">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<nail x="-25" y="-110"/>
+			<nail x="-144" y="-110"/>
+		</transition>
+		<transition id="id4">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<nail x="-306" y="-25"/>
+			<nail x="-195" y="-25"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-314" y="-136">open_door[id]!</label>
+			<nail x="-204" y="-110"/>
+			<nail x="-306" y="-110"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id0"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-136" y="-17">close_door[id]!</label>
+			<nail x="-136" y="-25"/>
+			<nail x="-25" y="-25"/>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">ElevatorDoor</name>
+		<parameter>const ID id</parameter>
+		<declaration>// Place local declarations here.
+clock t;
+int door_outside_length;
+int open_timer;
+
+bool isfree(int id) {
+    return not (status[id] == 0 or status[id] == 1);
+}</declaration>
+		<location id="id7" x="-229" y="-127">
+			<name x="-331" y="-170">stopped_door_closed</name>
+		</location>
+		<location id="id8" x="51" y="-127">
+			<name x="59" y="-170">stopped_opening_door</name>
+			<label kind="invariant" x="68" y="-119">t&lt;=1</label>
+		</location>
+		<location id="id9" x="-229" y="93">
+			<name x="-408" y="59">stopped_closing_door</name>
+			<label kind="invariant" x="-272" y="102">t&lt;=1</label>
+		</location>
+		<location id="id10" x="51" y="93">
+			<name x="59" y="59">stopped_door_opened</name>
+			<label kind="invariant" x="59" y="102">t&lt;=1</label>
+		</location>
+		<init ref="id7"/>
+		<transition id="id11">
+			<source ref="id8"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-8" y="-272">t&gt;=1 &amp;&amp; door_outside_length&gt;0</label>
+			<label kind="assignment" x="-76" y="-255">t=0, door_outside_length=door_outside_length - 1</label>
+			<nail x="153" y="-127"/>
+			<nail x="153" y="-229"/>
+			<nail x="51" y="-229"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-391" y="187">t&gt;=1 &amp;&amp; door_outside_length&lt;2</label>
+			<label kind="assignment" x="-433" y="204">t=0, door_outside_length=door_outside_length+1</label>
+			<nail x="-229" y="178"/>
+			<nail x="-340" y="178"/>
+			<nail x="-340" y="93"/>
+		</transition>
+		<transition id="id13">
+			<source ref="id10"/>
+			<target ref="id10"/>
+			<label kind="guard" x="17" y="187">t&gt;=1 &amp;&amp; open_timer &gt; 0</label>
+			<label kind="assignment" x="-8" y="204">t=0, open_timer=open_timer-1</label>
+			<nail x="161" y="93"/>
+			<nail x="161" y="178"/>
+			<nail x="51" y="178"/>
+		</transition>
+		<transition id="id14">
+			<source ref="id10"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-153" y="119">open_timer==0</label>
+			<label kind="assignment" x="-110" y="136">t=0</label>
+			<nail x="25" y="118"/>
+			<nail x="-204" y="118"/>
+		</transition>
+		<transition id="id15">
+			<source ref="id9"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-178" y="-59">open_door[id]?</label>
+			<label kind="assignment" x="-127" y="-34">t=0</label>
+		</transition>
+		<transition id="id16">
+			<source ref="id10"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="-136" y="51">close_door[id]?</label>
+			<label kind="assignment" x="-110" y="68">t=0</label>
+		</transition>
+		<transition id="id17">
+			<source ref="id8"/>
+			<target ref="id10"/>
+			<label kind="guard" x="59" y="-42">door_outside_length==0</label>
+			<label kind="assignment" x="59" y="-17">t=0, open_timer=5</label>
+		</transition>
+		<transition id="id18">
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-136" y="-170">isfree(id)</label>
+			<label kind="synchronisation" x="-153" y="-153">open_door[id]?</label>
+			<label kind="assignment" x="-204" y="-119">t=0, door_outside_length=2</label>
+		</transition>
+		<transition id="id19">
+			<source ref="id9"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-425" y="-42">door_outside_length==2</label>
+			<label kind="assignment" x="-272" y="-17">t=0</label>
+		</transition>
+	</template>
+	<system>system User, ElevatorDoor;
+</system>
+	<queries>
+		<query>
+			<formula>A[] ElevatorDoor(0).open_timer&gt;=0 and ElevatorDoor(0).open_timer&lt;=5</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-23 23:29:38 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; ElevatorDoor(1).stopped_door_opened</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-23 23:28:27 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>A[] forall(i:ID) User(i).Press_Close imply not ElevatorDoor(i).stopped_door_opened</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-23 23:33:18 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>A[] forall(i:ID) User(i).Press_Open imply not ElevatorDoor(i).stopped_door_closed and not ElevatorDoor(i).stopped_closing_door</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-23 23:32:08 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>A[] ElevatorDoor(0).door_outside_length&gt;=0 and ElevatorDoor(0).door_outside_length&lt;=2</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-23 23:29:46 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-23 23:25:48 +0800">
+			</result>
+		</query>
+	</queries>
+</nta>
