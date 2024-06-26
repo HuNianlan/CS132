@@ -1,0 +1,66 @@
+from PyQt5 import QtCore, QtWidgets,QtGui
+
+class Ui_ChangePin(object):
+    '''
+    This is a class for the ChangePin UI of ATM.
+    Set the distribution of keys on the interface
+    '''
+    def setupUi(self, ChangePin):
+        ChangePin.setObjectName("ChangePin")
+        ChangePin.setGeometry(QtCore.QRect(0, 0, 841, 491))  
+        ChangePin.setMinimumSize(QtCore.QSize(841, 491))
+        ChangePin.setMaximumSize(QtCore.QSize(841, 491))
+        self.label = QtWidgets.QLabel(ChangePin)
+        self.label.setGeometry(QtCore.QRect(320, 100, 201, 41))  
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        self.label.setFont(font)
+        self.label.setObjectName("label")
+        self.label_2 = QtWidgets.QLabel(ChangePin)
+        self.label_2.setGeometry(QtCore.QRect(180, 200, 61, 16))  
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_2.setFont(font)
+        self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(ChangePin)
+        self.label_3.setGeometry(QtCore.QRect(180, 250, 171, 16))  
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_3.setFont(font)
+        self.label_3.setObjectName("label_3")
+        self.lineEdit = QtWidgets.QLineEdit(ChangePin)
+        self.lineEdit.setGeometry(QtCore.QRect(150, 220, 311, 21))  
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEdit.setFont(font)
+        self.lineEdit.setObjectName("lineEdit")
+        self.lineEdit_2 = QtWidgets.QLineEdit(ChangePin)
+        self.lineEdit_2.setGeometry(QtCore.QRect(150, 270, 311, 21))  
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEdit_2.setFont(font)
+        self.lineEdit_2.setObjectName("lineEdit_2")
+        self.pushButton = QtWidgets.QPushButton(ChangePin)
+        self.pushButton.setGeometry(QtCore.QRect(300, 350, 121, 41)) 
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.pushButton.setFont(font)
+        self.pushButton.setObjectName("pushButton")
+        self.pushButton_2 = QtWidgets.QPushButton(ChangePin)
+        self.pushButton_2.setGeometry(QtCore.QRect(300, 400, 121, 41))  
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setObjectName("pushButton_2")
+
+        self.retranslateUi(ChangePin)
+        QtCore.QMetaObject.connectSlotsByName(ChangePin)
+
+    def retranslateUi(self, ChangePin):
+        _translate = QtCore.QCoreApplication.translate
+        ChangePin.setWindowTitle(_translate("ChangePin", "Change PIN"))
+        self.label.setText(_translate("ChangePin", "Change PIN"))
+        self.label_2.setText(_translate("ChangePin", "New PIN"))
+        self.label_3.setText(_translate("ChangePin", "Confirm New PIN"))
+        self.pushButton.setText(_translate("ChangePin", "CONFIRM"))
+        self.pushButton_2.setText(_translate("ChangePin", "BACK"))
