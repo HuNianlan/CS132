@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>broadcast chan Inject;
+broadcast chan ChangeStatus;
+broadcast chan addPainkiller;
+int baseline = 100 ; 
+int bolus = 300 ;
+int limit_hour =  1000 ; 
+int limit_day = 3000;
+int remaining = 0;
+int capacity  = 10000;
+bool status = true;
+
+
+clock gclk;</declaration>
+	<template>
+		<name x="5" y="5">Processor</name>
+		<declaration>// Place local declarations here.
+clock t;
+const int history_size = 1440;
+int injection_history[1440];
+int pointer = 0;
+bool check_inject_baseline = true;
+bool check_inject_bolus = false;
+int last_one_day = 0;
+int last_one_hour = 0;
+
+void update() { 
+    int i;
+    last_one_day = 0;
+    last_one_hour = 0;
+    injection_history[pointer]+=baseline * check_inject_baseline * status;
+  for (i = 0; i &lt; history_size; i++) {
+    last_one_day += injection_history[i];
+  }
+  for (i = 0; i &lt; 60; i++) {
+    int index = pointer-i;
+    if(index&lt;0){
+        index = 1440 + index;}
+    last_one_hour += injection_history[index];
+  }
+    if(last_one_day+baseline &lt; limit_day and last_one_hour+baseline &lt; limit_hour){
+        check_inject_baseline = true;
+    }
+    else{
+         check_inject_baseline = false;}
+
+    if(last_one_day+bolus &lt; limit_day and last_one_hour+bolus &lt; limit_hour and remaining &gt;= bolus){
+        check_inject_bolus = true;
+    }
+    else{
+         check_inject_bolus = false;}
+    pointer++;
+    if(pointer=1440){
+        pointer = 0;}
+}</declaration>
+		<location id="id0" x="-111" y="-306">
+			<name x="-238" y="-331">Injecting</name>
+		</location>
+		<location id="id1" x="144" y="-306">
+			<name x="134" y="-340">BolusInjecting</name>
+			<committed/>
+		</location>
+		<location id="id2" x="34" y="-586">
+			<name x="24" y="-620">updating</name>
+			<committed/>
+		</location>
+		<init ref="id0"/>
+		<transition id="id3">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="assignment" x="-228" y="-582">update(),t = 0</label>
+			<nail x="-246" y="-586"/>
+		</transition>
+		<transition id="id4">
+			<source ref="id0"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-93" y="-480">t&lt;=1</label>
+		</transition>
+		<transition id="id5">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="assignment" x="34" y="-408">injection_history[pointer]+=bolus * check_inject_bolus</label>
+		</transition>
+		<transition id="id6">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-9" y="-323">Inject?</label>
+		</transition>
+	</template>
+	<template>
+		<name>Patient</name>
+		<declaration>clock t;</declaration>
+		<location id="id7" x="-442" y="-187">
+			<name x="-493" y="-196">Free</name>
+		</location>
+		<init ref="id7"/>
+		<transition id="id8">
+			<source ref="id7"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-424" y="-229">Inject!</label>
+			<nail x="-314" y="-238"/>
+			<nail x="-382" y="-68"/>
+		</transition>
+	</template>
+	<template>
+		<name>Physician</name>
+		<declaration>clock t;</declaration>
+		<location id="id9" x="-833" y="-51">
+			<name x="-841" y="-85">Free</name>
+		</location>
+		<location id="id10" x="-595" y="-76">
+			<name x="-605" y="-110">adding</name>
+			<committed/>
+		</location>
+		<location id="id11" x="-1054" y="0">
+			<name x="-1198" y="0">StatusChanging</name>
+			<committed/>
+		</location>
+		<init ref="id9"/>
+		<transition id="id12">
+			<source ref="id11"/>
+			<target ref="id9"/>
+			<label kind="assignment" x="-1010" y="17">status = not status</label>
+			<nail x="-1028" y="85"/>
+		</transition>
+		<transition id="id13">
+			<source ref="id9"/>
+			<target ref="id11"/>
+			<label kind="synchronisation" x="-1037" y="-42">ChangeStatus!</label>
+		</transition>
+		<transition id="id14">
+			<source ref="id10"/>
+			<target ref="id9"/>
+			<label kind="assignment" x="-815" y="-123">remaining = capacity</label>
+			<nail x="-620" y="-195"/>
+		</transition>
+		<transition id="id15">
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-756" y="-85">addPainkiller!</label>
+		</transition>
+	</template>
+	<system>// Process
+Patient1 = Patient();
+Physician1 = Physician();
+
+system Processor, Patient1, Physician1;</system>
+	<queries>
+		<option key="--diagnostic" value="1"/>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-22 16:41:37 +0800">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>A[] Processor.check_inject_bolus imply Processor.last_one_day &lt;= limit_day and Processor.last_one_hour &lt;= limit_hour</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-22 16:41:40 +0800">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>A[] Processor.check_inject_bolus imply remaining &gt;= bolus</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-22 16:41:41 +0800">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>A[] Processor.check_inject_baseline imply Processor.last_one_day &lt;= limit_day and Processor.last_one_hour &lt;= limit_hour</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-22 16:41:43 +0800">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>A[] 0&lt;= remaining &lt;=capacity</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-06-22 16:41:44 +0800">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+	</queries>
+</nta>
